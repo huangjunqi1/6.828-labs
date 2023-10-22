@@ -1,0 +1,200 @@
+\documentclass[UTF8,11pt]{ctexart}
+\usepackage{graphicx}
+\usepackage{enumerate}
+\usepackage{color}
+\usepackage{geometry} 
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[colorlinks,linkcolor=blue]{hyperref} 
+\hypersetup{colorlinks=true,linkcolor=blue}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{ %
+    backgroundcolor=\color{white},      % choose the background color
+    columns=flexible,
+    breaklines=true,
+    tabsize=4,
+    commentstyle=\color{mygreen},  % comment style
+    keywordstyle=\color{blue},     % keyword style
+    stringstyle=\color{mymauve}\ttfamily,  % string literal style
+    frame=none,
+    rulesepcolor=\color{red!20!green!20!blue!20},
+    language = c++,
+    frame=single
+% identifierstyle=\color{red},
+}
+
+
+\pagestyle{plain}
+\geometry{left=2.2cm,right=2.3cm,top=1.5cm,bottom=1.5cm}
+\title{Report for the 1st lab}
+\author{姓名：黄骏齐mat={\Large\bfseries}]{section}
+\and 学号：2100012956}
+\date{2023年10月7日}
+
+\CTEXsetup[for
+\begin{document}
+\maketitle
+\section*{exercise2}
+    Set register \verb|%ss| and \verb|%esp|(\verb|%esp| to \verb|0x7000|).
+
+    Get some data from disk using \verb|in| and \verb|out|.
+
+    Set PE in \verb|%cr0| to move in the protected mode and jump.
+\section*{exercise3}
+
+After \verb|%cr0| is reset, the computer enter 32-bit mode, through setting the PE symble in \verb|%cr0|.
+
+The last instruction which boot loader executed is \verb|call *0x10018|
+
+The first instruction of kernal is that at \verb|0x0010000c|, which is \verb|movw $0x1234, 0x472|.
+\section*{exercise4}
+\begin{lstlisting}
+1: a = 000000000062FDC0, b = 0000000000BF1410, c = 0000000000000001
+//a and b point to random address,c is a NULL pointer.
+2: a[0] = 200, a[1] = 101, a[2] = 102, a[3] = 103
+//a[x] == *(a+x)
+3: a[0] = 200, a[1] = 300, a[2] = 301, a[3] = 302
+//c=a, so 3[c]=c[3]=a[3]
+4: a[0] = 200, a[1] = 400, a[2] = 301, a[3] = 302
+//c=c+1 == c=(int*)((int c)+4)=> c points to a[1]
+5: a[0] = 200, a[1] = 128144, a[2] = 256, a[3] = 302
+//c points to ((char*)a + 1), and modify two integer.
+6: a = 000000000062FDC0, b = 000000000062FDC4, c = 000000000062FDC1
+//(int *) a + 1 = (int*)((int a) + 4); (int*)((char*)a+1) =  (int*)((int a) + 1) ;
+\end{lstlisting}
+\newpage
+\section*{exercise5}
+
+I modify \verb|0x7C00| to \verb|0x7C2D|, and get the result below.
+
+\includegraphics*[scale=0.65]{ex5.png}
+
+\section*{exercise6}
+
+When entering bootloader, the few words at \verb|0x00100000| are all 0.
+
+After loading the kernal, the few words at \verb|0x00100000| are not all 0.
+
+The reason is bootloader load the kernal to \verb|0x00100000|.
+\section*{exercise7}
+
+Afer this instruction, both \verb|0x00100000| and \verb|0xf0100000| point to the same pysical address, and after comment out this instruction, the \verb|jmp| lead to crash.
+\section*{exercise8}
+Fill the code just like \verb|%h|.
+
+\begin{lstlisting}
+//in lib/printfmt.c
+case 'o':
+    // Replace this with your code.
+    num = getuint(&ap, lflag);
+    base = 8;
+    goto number;
+\end{lstlisting}
+\subsection*{1}
+\verb|console.c| export the function \verb|cputchar()| for \verb|printf.c|'s function \verb|putch|, which is used to print a single character. In the function \verb|vcprintf| in \verb|printf.c|, push \verb|putch| as an argument to the function \verb|vprintfmt|. 
+\subsection*{2}
+When the screen is full, move out the first line, move up the other lines to insert the new line.
+\subsection*{3}
+\verb|fmt| points to the char \verb|x|(the 1st char of the string \verb|x %d, y %x, z %d\n|)，\verb|ap| points to the first argument (value \verb|x|)
+
+\begin{enumerate}
+    \item \verb|vcprintf (fmt=0xf0101937 "x %d, y %x, z %d\n", ap=0xf010ffd4 "\001")|
+    \item \verb|cons_putc(c=120)|
+    \item \verb|cons_putc(c=32)|
+    \item \verb|va_arg| ap$\to$x $\Rightarrow$ ap$\to$y
+    \item \verb|cons_putc (c=49)|
+    \item \verb|cons_putc (c=44)|
+    \item \verb|cons_putc (c=32)|
+    \item \verb|cons_putc (c=121)|
+    \item \verb|cons_putc (c=32)|
+    \item \verb|va_arg| ap$\to$y $\Rightarrow$ ap-$\to$z
+    \item \verb|cons_putc (c=51)|
+    \item \verb|cons_putc (c=44)|
+    \item \verb|cons_putc (c=32)|
+    \item \verb|cons_putc (c=122)|
+    \item \verb|cons_putc (c=32)|
+    \item \verb|va_arg| ap$\to$z $\Rightarrow$ ap$\to$the address next z in the stack.
+    \item \verb|cons_putc (c=52)|
+    \item \verb|cons_putc (c=10)|
+\end{enumerate}
+\subsection*{4}
+''He110 World''
+
+Modify i to 0x726c6400.
+
+No need to change 57616.
+\subsection*{5}
+
+the value at the address next \verb|&x| in the stack.
+
+The \verb|ap| will point to the value next \verb|&x| in the stack and print it to the screen as an \verb|int|.
+
+\subsection*{6}
+
+I use another stack(manually) to offset the effect of reversal.
+\section*{exercise9}
+There is a instrction in \verb|entry.S| that \verb|movl	$(bootstacktop),%esp| to initialize the stack.
+
+The virtual address \verb|0xf0110000| is the end of the stack.
+
+\verb|.data| reserves the space of the stack.
+\section*{exercise10}
+
+\begin{enumerate}
+    \item push the arguments reversely;
+    \item push the return address(address that the next instrction of \verb|call|);
+    \item push the \verb|%ebp| register of the last function;
+    \item save \verb|%esp| in the \verb|%ebp| register;
+    \item push callee registers to the stack;
+    \item push some local values.
+\end{enumerate}
+
+Every execution of \verb|test_backtrace| will make \verb|%esp| move 32 byte (8 32-bit words.)
+
+They're \verb|%eip|,\verb|%ebp|,\verb|%ebx|,and 5 arguments.
+\subsection*{exercise11,12}
+The type is \verb|N_SLINE|
+
+\begin{lstlisting}
+//in kern\kdebug.c
+	stab_binsearch(stabs,&lline,&rline,N_SLINE,addr);
+	if (lline>rline) return -1;
+	info->eip_line = rline-lfile;
+\end{lstlisting}
+
+
+从汇编可以看出，进入函数时，先执行\verb|push %ebp|再\verb|mov %esp %ebp|，因此：
+
+\verb|*ebp| saves the \verb|%ebp| this function.
+
+\verb|*(ebp+1)| saves the \verb|%ebp| last function.
+
+\verb|*(ebp+2)| to \verb|*(ebp+6)| is the first 5 arguments.
+\newpage
+\begin{lstlisting}
+//in kern\monitor.c
+int
+mon_backtrace(int argc, char **argv, struct Trapframe *tf)
+{
+	cprintf("Stack backtrace:\n");
+	int* ebp = ((int*)read_ebp());
+	while (ebp != 0)
+	{
+		int eip = *(ebp+1);
+		cprintf("  ebp %08x  eip %08x  args %08x %08x %08x %08x %08x\n",ebp+1,eip,*(ebp+2),*(ebp+3),*(ebp+4),*(ebp+5),*(ebp+6));
+		struct Eipdebuginfo info;
+		int tmp = debuginfo_eip(eip, &info);
+		cprintf("         %s:%d: ",info.eip_file,info.eip_line);
+		for (int i=0;i<info.eip_fn_namelen;i++) //info.eip_fn_namelen saves the length of the function
+			cprintf("%c",info.eip_fn_name[i]);
+		cprintf("+%d\n",info.eip_fn_narg);
+		ebp = (int*)(*(ebp));
+	}
+	return 0;
+}
+\end{lstlisting}
+
+\end{document}
+
